@@ -27,7 +27,7 @@ void setup() {
 
 
   WiFi.mode(WIFI_STA);
-  //WiFiMulti.addAP("PA_Goscie", "superplus");
+  WiFiMulti.addAP("PA_Goscie", "superplus");
   WiFiMulti.addAP("OneCloos", "biggenerator");
 
   if (EEPROM.read(1023) == 1) {
