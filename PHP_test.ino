@@ -70,7 +70,7 @@ void loop() {
 
     String url = String("http://clooske.y0.pl/connector.php?name=ArduinoNodeMCU&ip=" + WiFi.localIP().toString() + "&val1=" + String(analogRead(0)));
 
-
+    //
     if (millis() - oldmil > 100) {
       //Serial.print("[HTTP] begin...\n");
       if (http.begin(client, url)) {  // HTTP
@@ -88,7 +88,7 @@ void loop() {
           // file found at server
           if (httpCode == HTTP_CODE_OK || httpCode == HTTP_CODE_MOVED_PERMANENTLY) {
             String payload = http.getString();
-            LED = payload.substring(payload.indexOf("val4") + 5, payload.indexOf('\n', payload.indexOf("val4"))).substring(0,1).toInt() == 1;
+            LED = payload.substring(payload.indexOf("val4") + 5, payload.indexOf('\n', payload.indexOf("val4"))).substring(0, 1).toInt() == 1;
             Serial.println(payload);
             Serial.println(LED);
           }
@@ -104,6 +104,10 @@ void loop() {
     }
 
   }
+
+
+
+  //// komunikacja szeregowa
 
   if (stringComplete) {
     if (inputString.substring(0, 5) == "WIFI;") {
@@ -155,5 +159,5 @@ void loop() {
       Serial.println(inputString);
     }
   }
-  digitalWrite(LED_BUILTIN,LED);
+  digitalWrite(LED_BUILTIN, LED);
 }
