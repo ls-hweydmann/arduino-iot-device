@@ -25,11 +25,6 @@ void setup() {
   Serial.println();
   Serial.println();
 
-  for (uint8_t t = 4; t > 0; t--) {
-    Serial.printf("[SETUP] WAIT %d...\n", t);
-    Serial.flush();
-    delay(1000);
-  }
 
   WiFi.mode(WIFI_STA);
   //WiFiMulti.addAP("PA_Goscie", "superplus");
@@ -50,6 +45,15 @@ void setup() {
     Serial.println(sPASS);
 
     WiFiMulti.addAP(eeAP, eePASS);
+  }
+  
+  for (uint8_t t = 4; t > 0; t--) {
+    Serial.printf("[SETUP] WAIT %d...\n", t);
+    Serial.flush();
+    delay(1000);
+  }
+  while (not WiFiMulti.run() == WL_CONNECTED){
+    continue;
   }
 }
 int oldmil = 0;
@@ -121,6 +125,9 @@ void loop() {
       }
       EEPROM.commit();
       Serial.println("Clearing EEPROM...");
+      WiFi.disconnect();
+      ESP.reset();
+      delay(1000);
     }
     
     inputString = "";
