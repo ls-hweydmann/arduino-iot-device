@@ -46,17 +46,20 @@ void setup() {
 
     WiFiMulti.addAP(eeAP, eePASS);
   }
-  
+
   for (uint8_t t = 4; t > 0; t--) {
     Serial.printf("[SETUP] WAIT %d...\n", t);
     Serial.flush();
     delay(1000);
   }
-  while (not WiFiMulti.run() == WL_CONNECTED){
+  while (not WiFiMulti.run() == WL_CONNECTED) {
     continue;
   }
+  pinMode(LED_BUILTIN, OUTPUT);
 }
+bool LED;
 int oldmil = 0;
+
 void loop() {
   // wait for WiFi connection
   if ((WiFiMulti.run() == WL_CONNECTED)) {
@@ -65,25 +68,29 @@ void loop() {
 
     HTTPClient http;
 
-
-    if (millis() - oldmil > 5000) {
-      Serial.print("[HTTP] begin...\n");
-      if (http.begin(client, String("http://clooske.y0.pl/connector.php?name=ArduinoNodeMCU&val=" + WiFi.localIP().toString()))) {  // HTTP
+    String url = String("http://clooske.y0.pl/connector.php?name=ArduinoNodeMCU&ip=" + WiFi.localIP().toString() + "&val1=" + String(analogRead(0)));
 
 
-        Serial.print("[HTTP] GET...\n");
+    if (millis() - oldmil > 100) {
+      //Serial.print("[HTTP] begin...\n");
+      if (http.begin(client, url)) {  // HTTP
+
+
+        //Serial.print("[HTTP] GET...\n");
         // start connection and send HTTP header
         int httpCode = http.GET();
 
         // httpCode will be negative on error
         if (httpCode > 0) {
           // HTTP header has been send and Server response header has been handled
-          Serial.printf("[HTTP] GET... code: %d\n", httpCode);
+          //Serial.printf("[HTTP] GET... code: %d\n", httpCode);
 
           // file found at server
           if (httpCode == HTTP_CODE_OK || httpCode == HTTP_CODE_MOVED_PERMANENTLY) {
             String payload = http.getString();
+            LED = payload.substring(payload.indexOf("val4") + 5, payload.indexOf('\n', payload.indexOf("val4"))).substring(0,1).toInt() == 1;
             Serial.println(payload);
+            Serial.println(LED);
           }
         } else {
           Serial.printf("[HTTP] GET... failed, error: %s\n", http.errorToString(httpCode).c_str());
@@ -101,7 +108,7 @@ void loop() {
   if (stringComplete) {
     if (inputString.substring(0, 5) == "WIFI;") {
 
-      String app = inputString.substring(5, inputString.indexOf(';', 6)+1);
+      String app = inputString.substring(5, inputString.indexOf(';', 6) + 1);
       String pp = inputString.substring(inputString.indexOf(';', 6) + 1, inputString.indexOf(';', inputString.indexOf(';', 6) + 1));
       char ap[app.length()];
       app.toCharArray(ap, app.length());
@@ -119,7 +126,7 @@ void loop() {
       WiFi.printDiag(Serial);
     }
 
-    if (inputString.substring(0,5).equals("clear")) {
+    if (inputString.substring(0, 5).equals("clear")) {
       for (int i = 0 ; i < EEPROM.length() ; i++) {
         EEPROM.write(i, 0);
       }
@@ -129,7 +136,7 @@ void loop() {
       ESP.reset();
       delay(1000);
     }
-    
+
     inputString = "";
     stringComplete = false;
 
@@ -148,4 +155,5 @@ void loop() {
       Serial.println(inputString);
     }
   }
+  digitalWrite(LED_BUILTIN,LED);
 }
